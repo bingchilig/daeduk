@@ -1,0 +1,28 @@
+{
+ "host": "127.0.0.1",
+ "port": 8000,
+ "open_browser": true,
+ "excel_path": "../대덕전자 장애 예술인_작품 리스트(관리용)_20261008.xlsx",
+ "admin_pin": "4444",
+ "comment_max_length": 100,
+ "gesture": {
+  "mode": "tilt",
+  "camera_index": 0,
+  "mirror": true,
+  "tilt_angle": 28.0,
+  "neutral_angle": 12.0,
+  "hold_time": 0.25,
+  "cooldown": 1.0,
+  "arm_time": 0.3,
+  "video": true,
+  "video_fps": 15,
+  "min_distance": 0.18,
+  "min_speed": 0.8,
+  "window": 0.35,
+  "max_vertical": 0.7,
+  "return_margin": 0.1,
+  "return_timeout": 3.0,
+  "frame_width": 640,
+  "preview": false
+ }
+}

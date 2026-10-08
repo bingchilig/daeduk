@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>여운 작동 가이드</title>
+<style>
+  :root { --violet:#7c3aed; --violet-d:#5b21b6; --violet-l:#ede9fe; --ink:#18181b; --g7:#3f3f46; --g5:#71717a; --g2:#e4e4e7; --g1:#f4f4f5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif; color:var(--ink); background:#fafafa; line-height:1.7; font-size:15px; }
+  header { background:var(--violet); color:#fff; padding:36px 20px 28px; }
+  header div, main { max-width:880px; margin:0 auto; }
+  header h1 { margin:0; font-size:28px; letter-spacing:-0.02em; }
+  header p { margin:6px 0 0; opacity:.9; }
+  main { padding:24px 20px 80px; }
+  nav.toc { background:#fff; border:1px solid var(--g2); border-radius:12px; padding:14px 18px; margin-bottom:24px; }
+  nav.toc ol { margin:0; padding-left:20px; columns:2; column-gap:28px; }
+  nav.toc a { color:var(--violet-d); text-decoration:none; }
+  section { background:#fff; border:1px solid var(--g2); border-radius:12px; padding:20px 22px; margin-bottom:16px; }
+  h2 { margin:0 0 10px; font-size:19px; }
+  h2 .n { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:8px; background:var(--violet); color:#fff; font-size:14px; margin-right:8px; vertical-align:2px; }
+  h3 { font-size:15.5px; margin:16px 0 6px; }
+  code, kbd { font-family:Consolas,'D2Coding',monospace; background:var(--g1); padding:1px 6px; border-radius:5px; font-size:13.5px; }
+  kbd { border:1px solid var(--g2); border-bottom-width:2px; }
+  pre { background:#1f1f24; color:#f4f4f5; padding:14px 16px; border-radius:10px; overflow-x:auto; font-size:13px; line-height:1.6; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { border-bottom:1px solid var(--g2); padding:8px 6px; text-align:left; vertical-align:top; }
+  th { color:var(--g5); font-weight:500; font-size:13px; }
+  .tip { background:var(--violet-l); color:var(--violet-d); border-radius:10px; padding:10px 14px; margin:10px 0; }
+  .warn { background:#fff7ed; color:#9a3412; border-radius:10px; padding:10px 14px; margin:10px 0; }
+  ol.steps > li { margin-bottom:8px; }
+  .muted { color:var(--g5); font-size:13.5px; }
+  @media (max-width:640px){ nav.toc ol { columns:1; } }
+</style>
+</head>
+<body>
+<header><div>
+  <h1>여운 — 손짓으로 만나는 3D 전시관</h1>
+  <p>작동 가이드 · 4팀 44xla · 대덕전자 미션 (로컬 시연용 첫 MVP)</p>
+</div></header>
+<main>
+  <nav class="toc" aria-label="목차"><ol>
+    <li><a href="#s1">무엇을 만들었나</a></li>
+    <li><a href="#s2">처음 실행하기</a></li>
+    <li><a href="#s3">시연 전 준비</a></li>
+    <li><a href="#s4">시연 순서</a></li>
+    <li><a href="#s5">전시관 조작법</a></li>
+    <li><a href="#s6">제스처 모드와 감도</a></li>
+    <li><a href="#s7">관리자 페이지</a></li>
+    <li><a href="#s8">엑셀 다시 불러오기</a></li>
+    <li><a href="#s9">폴더 구조</a></li>
+    <li><a href="#s10">문제 해결</a></li>
+    <li><a href="#s11">꼭 지킬 원칙</a></li>
+    <li><a href="#s12">바뀐 규칙 · 다음 단계</a></li>
+  </ol></nav>
+
+  <section id="s1"><h2><span class="n">1</span>무엇을 만들었나</h2>
+    <p>창고에 보관된 장애 예술인 작품을 <b>3D 온라인 전시관</b>의 벽에 걸고, 버튼·방향키·<b>손 기울이기</b>로 넘겨 보며 <b>관심 저장과 한마디</b>를 남기면 담당자가 관리자 페이지에서 반응을 확인하는 서비스예요.</p>
+    <ul>
+      <li><b>전시관 건물</b>: <code>3d</code> 폴더의 평면도 건물(5개 전시실)을 그대로 쓰고, 벽마다 작품 걸 자리와 감상 지점을 자동으로 계산해요.</li>
+      <li><b>작품</b>: 엑셀 <code>2.작품 리스트_RAWDATA</code> 시트의 157점(이미지 있는 156점 전시)을 테마별로 나눴어요.<br>
+        1전시실 가족 · 2전시실 이야기 · 3전시실 자연 Ⅰ(2025–2026 인수) · 4전시실 자연 Ⅱ(2023–2024 인수) · 5전시실 감정</li>
+      <li><b>이미지</b>: 엑셀 '사진' 칸의 미리보기는 칸 크기에 맞춰 눌려 있어서, 숨김 시트(<code>2-1.작품 리스트_가공용</code> 등)에서 같은 그림을 자동으로 찾아 원본 비율 그림을 썼어요. 못 찾은 41점은 관리자 페이지에 <b>'비율 확인 필요'</b>로 표시돼요.</li>
+      <li><b>작가 이름</b>: 공개 화면은 익명 표시명(예: 강○혜)이 기본이에요. 실명은 관리자 화면에서만 보여요.</li>
+      <li><b>데이터베이스</b>: 작품·전시실·작가 표시명·소개문·위치·관심·한마디는 모두 <code>data/yeoun.db</code>(SQLite)에 저장돼요. 'DB Browser for SQLite' 프로그램으로 열어 볼 수 있어요.</li>
+    </ul>
+  </section>
+
+  <section id="s2"><h2><span class="n">2</span>처음 실행하기 (Windows)</h2>
+    <ol class="steps">
+      <li><b>Python 설치</b> — <a href="https://www.python.org/downloads/">python.org</a>에서 <b>Python 3.11</b>(3.10~3.12)을 설치해요. 설치 첫 화면에서 <b>"Add python.exe to PATH"</b>를 꼭 체크해요.
+        <div class="muted">MediaPipe는 아주 최신 Python에서는 설치가 안 될 수 있어요. 3.11이 가장 무난해요.</div></li>
+      <li><code>yeoun_gallery</code> 폴더에서 <b><code>시작하기.bat</code></b>을 더블클릭해요.
+        <ul>
+          <li>처음 한 번만 제스처용 라이브러리(<code>opencv-python</code>, <code>mediapipe</code>, <code>pillow</code>)를 설치하고, 3D 라이브러리와 손 인식 모델을 내려받아요. 인터넷이 필요하고 몇 분 걸려요.</li>
+          <li>그다음 서버가 켜지고 브라우저가 <code>http://127.0.0.1:8000</code>으로 자동으로 열려요.</li>
+        </ul></li>
+      <li>끝낼 때는 검은 서버 창에서 <kbd>Ctrl</kbd>+<kbd>C</kbd>를 누르거나 창을 닫아요. 카메라도 함께 해제돼요.</li>
+    </ol>
+    <table>
+      <tr><th>주소</th><th>화면</th></tr>
+      <tr><td><code>http://127.0.0.1:8000/</code></td><td>3D 전시관 (방문자 화면)</td></tr>
+      <tr><td><code>http://127.0.0.1:8000/admin</code></td><td>관리자 페이지 · PIN 기본값 <code>4444</code> (<code>config.json</code>의 <code>admin_pin</code>)</td></tr>
+      <tr><td><code>http://127.0.0.1:8000/guide</code></td><td>이 가이드</td></tr>
+    </table>
+    <p class="muted">직접 실행하려면: <code>python -m pip install -r requirements.txt</code> → <code>python setup_assets.py</code> → <code>python server.py</code></p>
+    <div class="tip"><b>index.html을 더블클릭해서 열면 안 돼요.</b> 데이터와 제스처가 서버를 거치기 때문에, 반드시 서버를 켠 뒤 위 주소로 열어야 해요.</div>
+  </section>
+
+  <section id="s3"><h2><span class="n">3</span>시연 전 준비 (10분)</h2>
+    <ol class="steps">
+      <li><b>소개문 승인</b> — 관리자 → <b>소개문 검토</b> → 전시실을 '1전시실'로 고르고 작품을 하나씩 확인해 <b>승인하고 공개</b>를 눌러요. 처음에는 모든 소개문이 '검토 대기'라서 전시관에는 "소개문 검토 중"으로 보여요.</li>
+      <li><b>위치 확인</b> — 작품 관리에서 시연에 쓸 작품의 '현재 위치'가 맞는지 확인해요. 엑셀 설치위치가 빈칸이면 '확인 필요'로 표시돼요.</li>
+      <li><b>제스처 리허설</b> — 시연 장소 조명에서 제스처 모드를 켜고 감도를 맞춰요(6번 참고). 웹캠은 사람 상반신이 다 들어오게 두고, 뒤쪽이 너무 밝은 창문은 피해요.</li>
+      <li><b>반응 초기화</b> — 리허설에서 남긴 관심·한마디는 관리자 → 관람 반응 → <b>시연 전 반응 기록 초기화</b>로 지워요.</li>
+      <li><b>오프라인 대비</b> — <code>setup_assets.py</code>를 한 번 실행했다면 인터넷 없이도 3D 화면과 제스처가 동작해요. (글꼴만 기본 글꼴로 바뀌어요)</li>
+    </ol>
+    <div class="tip">특정 작품에서 바로 시작하려면 주소 뒤에 <code>#room=1&amp;i=3</code>(1전시실 3번째 작품)을 붙여요.</div>
+  </section>
+
+  <section id="s4"><h2><span class="n">4</span>시연 순서 — 버튼 이동 → 손동작 이동 → 관심·반응 반영</h2>
+    <ol class="steps">
+      <li>전시관 첫 화면에서 건물 전체를 보여 주며 "창고에 있던 작품 156점이 5개 전시실에 걸려 있어요"라고 소개해요.</li>
+      <li><b>1전시실 클릭</b>(또는 '입장하기') → 시점이 실내로 내려가 <b>첫 작품이 정면</b>에 보여요.</li>
+      <li><b>'다음 작품' 버튼</b> 2번, <kbd>→</kbd> 키 1번을 눌러 번호가 <code>1 / 18 → 4 / 18</code>으로 바뀌는 걸 보여 줘요. 오른쪽 카드에서 작품명 · 작가 표시명 · 승인된 소개문 · <b>실제 위치</b>와 <b>가상 전시 위치</b>가 따로 나오는 것도 짚어 줘요.</li>
+      <li><b>'제스처 모드 시작'</b> → 상태가 <b>준비 중 → 손 찾는 중 → 손 인식됨</b>으로 바뀌어요.</li>
+      <li>패널의 <b>카메라 화면</b>에 손 뼈대와 기울기 선이 그려지는 걸 보여 줘요. 손바닥을 화면 쪽으로 펴고 <b>손을 똑바로 세우면</b> 준비 완료(점이 보라색).</li>
+      <li>손을 <b>오른쪽으로 30° 정도 기울여 잠깐(0.2초) 유지</b>하면 '다음 작품 이동', <b>왼쪽</b>이면 '이전 작품 이동'이에요.</li>
+      <li>손을 <b>다시 세우는 동작이나 살짝 흔드는 동작은 넘어가지 않는 것</b>을 보여 줘요 (다시 세워야 다음 넘김 · 1초 대기).</li>
+      <li>마음에 드는 작품에서 <b>♡ 관심 저장</b>을 누르고, 한마디("색이 따뜻해요")를 남겨요.</li>
+      <li>관리자 페이지 → <b>현황판 / 관람 반응</b>에서 관심 +1과 한마디가 반영된 걸 보여 줘요. 이때 "반응 수는 관람 참여 기록이에요"라고 덧붙여요.</li>
+      <li><b>'제스처 모드 종료'</b> → 상태가 '웹캠 꺼짐'으로 바뀌고 카메라가 해제돼요.</li>
+    </ol>
+  </section>
+
+  <section id="s5"><h2><span class="n">5</span>전시관 조작법</h2>
+    <table>
+      <tr><th>하고 싶은 것</th><th>방법</th></tr>
+      <tr><td>전시실 들어가기</td><td>건물의 전시실 바닥·라벨 클릭, 오른쪽 전시실 목록 클릭, 숫자키 <kbd>1</kbd>~<kbd>5</kbd></td></tr>
+      <tr><td>작품 넘기기</td><td>하단 '이전 작품 / 다음 작품', <kbd>←</kbd> <kbd>→</kbd>, 손 기울이기, 같은 방 다른 작품 클릭</td></tr>
+      <tr><td>전시실 끝에서</td><td>다음 전시실 첫 작품으로 자동 이동해요 (5전시실 다음은 1전시실)</td></tr>
+      <tr><td>전체 보기로 나가기</td><td>상단 '전시관 전체 보기' 또는 <kbd>Esc</kbd></td></tr>
+      <tr><td>작품 찾기</td><td>상단 '작품 찾기' 또는 <kbd>/</kbd> → 작품명 · 작가 표시명 · 주제(꽃, 가족, 호랑이…) → 결과를 누르면 그 작품 앞으로 이동</td></tr>
+      <tr><td>작품 크게 보기</td><td>작품 카드의 '크게 보기' → 원본 비율·색 그대로 2D로 보여요</td></tr>
+      <tr><td>건물 둘러보기</td><td>전체 보기에서 드래그 회전 · 휠 확대 · 우클릭 드래그 이동, '벽 낮추기' · '평면' · '회전'</td></tr>
+    </table>
+    <p class="muted">이동 애니메이션 중에는 버튼·키·손짓 명령을 모두 무시해요 (중복 이동 방지). 경로가 벽에 막히는 L자 전시실에서는 부드러운 화면 전환(페이드)으로 이동해요.</p>
+  </section>
+
+  <section id="s6"><h2><span class="n">6</span>제스처 모드(손 기울이기)와 감도</h2>
+    <h3>작동 방식</h3>
+    <pre>웹캠 → gesture.py (OpenCV로 읽기 → MediaPipe Hand Landmarker로 손의 21개 점
+       → 손목(0번)→가운데 손가락 뿌리(9번) 방향이 세로선에서 몇 도 기울었는지 계산)
+     → 오른쪽으로 30° 이상, 0.2초 유지 = NEXT / 왼쪽 = PREV
+     → server.py가 {"id": 17, "cmd": "NEXT"} 이벤트 발행
+     → 브라우저(EventSource)가 받아서, 이미 처리한 번호면 무시 / 이동 중이면 무시 / 아니면 다음 작품으로</pre>
+    <ul>
+      <li>카메라는 <b>'제스처 모드 시작'을 눌렀을 때만</b> 켜지고, 종료하면 해제돼요.</li>
+      <li><b>카메라 화면</b>: 제스처 패널에 웹캠 화면(거울 모드)과 손 뼈대 · 기울기 선 · 각도가 보여요. 서버가 <b>이 PC(127.0.0.1)의 브라우저에만</b> 보내고 다른 PC에서의 접속은 거부해요. <b>저장하지 않아요</b>. 설정에서 '카메라 화면 보기'를 끌 수 있어요.</li>
+      <li>패널의 막대: 가운데 회색 = 손을 세운 범위, 양쪽 보라색 = 넘김 각도. 점이 회색이면 "손을 세워 주세요", 보라색이면 준비 완료예요.</li>
+      <li>각도는 화면 기준(거울)이에요. 사용자가 보기에 <b>오른쪽으로 기울이기 = 다음</b>.</li>
+    </ul>
+    <h3>판정 규칙과 조절 값 (<code>config.json</code> → <code>gesture</code>)</h3>
+    <table>
+      <tr><th>값</th><th>기본</th><th>뜻 · 언제 바꾸나</th></tr>
+      <tr><td><code>tilt_angle</code></td><td>30</td><td>이 각도(도) 이상 기울여야 넘김. 잘 안 넘어가면 ↓, 너무 잘 넘어가면 ↑</td></tr>
+      <tr><td><code>hold_time</code></td><td>0.2</td><td>기울인 채 유지해야 하는 시간(초). 흔들림에 넘어가면 ↑</td></tr>
+      <tr><td><code>neutral_angle</code></td><td>12</td><td>이 각도 안이면 '손을 세운 상태'. 넘긴 뒤에는 손을 다시 세워야 다음 넘김 (되돌리는 동작은 넘김 아님)</td></tr>
+      <tr><td><code>cooldown</code></td><td>1.0</td><td>한 번 넘긴 뒤 추가 넘김을 막는 시간(초)</td></tr>
+      <tr><td><code>arm_time</code></td><td>0.3</td><td>손이 처음 보인 뒤 판정을 시작하기까지 시간. 처음부터 기울어진 손은 한 번 세워야 해요</td></tr>
+      <tr><td><code>mode</code></td><td>tilt</td><td><code>swipe</code>로 바꾸면 예전 방식(손을 좌우로 휘두르기)</td></tr>
+      <tr><td><code>video</code></td><td>true</td><td>전시관 화면에 카메라 화면 보이기</td></tr>
+      <tr><td><code>camera_index</code></td><td>0</td><td>외장 웹캠이면 1로</td></tr>
+    </table>
+    <p>전시관 화면의 제스처 패널에서 <b>설정 아이콘</b>을 누르면 넘김 각도 · 유지 시간 · 대기 시간을 슬라이더로 바로 바꿀 수 있고 <code>config.json</code>에 저장돼요. <b>NEXT / PREV 테스트</b> 버튼은 카메라 없이 서버 → 웹 연결만 확인해요.</p>
+    <p class="muted">카메라만 따로 확인하려면 <code>python gesture.py</code> (확인 창 + 콘솔에 NEXT/PREV 출력)</p>
+  </section>
+
+  <section id="s7"><h2><span class="n">7</span>관리자 페이지 (<code>/admin</code>)</h2>
+    <table>
+      <tr><th>탭</th><th>할 수 있는 일</th></tr>
+      <tr><td>현황판</td><td>전체 작품 · 온라인 전시 수 · 소개문 승인 수 · 관심/한마디 수, 보관/설치 상태, 전시실별 작품 수, <b>확인이 필요한 항목</b></td></tr>
+      <tr><td>작품 관리</td><td>상태(보관 중 · 설치됨 · 대여·외부 전시 · 확인 필요)와 <b>현재 위치</b> 수정(엑셀 '위치' 시트 장소가 자동 완성), 가상 전시실 배정, 전시관 공개 여부, <b>이미지 교체</b>(비율 확인 필요 작품용)</td></tr>
+      <tr><td>소개문 검토</td><td>왼쪽 목록에서 작품 선택 → 엑셀 '작품 설명' 원문과 초안 비교 → 수정 → <b>승인하고 공개</b> / 보류 / 공개 취소. 원문에 작가 실명이 있으면 초안에서 표시명으로 바꿔 두고 알려 줘요.</td></tr>
+      <tr><td>작품 등록</td><td>작품명 · 작가 표시명 · 이미지 · 기초 설명으로 새 작품 등록. 실제 자료가 아니면 '예시 자료'를 체크해요(전시관에 '예시 자료' 표시).</td></tr>
+      <tr><td>관람 반응</td><td>최근 한마디(숨기기·삭제), 작품별 관심 수, 시연 전 반응 초기화</td></tr>
+      <tr><td>설정 · 엑셀</td><td>엑셀 다시 불러오기, 전시실 이름·테마 수정, 작가 표시명과 <b>실명 공개(동의 확인 시에만)</b></td></tr>
+    </table>
+  </section>
+
+  <section id="s8"><h2><span class="n">8</span>엑셀 다시 불러오기</h2>
+    <p>담당자가 엑셀을 고쳤다면 관리자 → 설정 · 엑셀 → <b>엑셀 다시 불러오기</b> (또는 <code>엑셀_다시_불러오기.bat</code>).</p>
+    <ul>
+      <li>엑셀 위치는 <code>config.json</code>의 <code>excel_path</code> (기본: 상위 폴더의 <code>대덕전자 장애 예술인_작품 리스트(관리용)_20261008.xlsx</code>). 파일 이름이 바뀌면 이 값을 고쳐요.</li>
+      <li>관리자 페이지에서 고친 <b>위치 · 상태 · 소개문 승인 · 전시실 배정 · 작가 표시명</b>은 그대로 유지돼요. 엑셀 '작품 설명' 원문이 바뀐 작품만 소개문이 다시 '검토 대기'가 돼요.</li>
+      <li>엑셀 원본은 읽기만 하고 수정하지 않아요. '작가사진' 시트는 쓰지 않아요.</li>
+      <li>이미지 매칭(같은 그림 찾기)과 크기 줄이기는 Pillow가 있어야 해요 (<code>requirements.txt</code>에 포함).</li>
+    </ul>
+  </section>
+
+  <section id="s9"><h2><span class="n">9</span>폴더 구조</h2>
+<pre>DAEDUK/
+├─ 3d/                          ← 원본 평면도 (수정하지 않음)
+├─ 대덕전자 장애 예술인_작품 리스트(관리용)_20261008.xlsx   ← 원본 엑셀 (읽기만)
+└─ yeoun_gallery/
+   ├─ 시작하기.bat              처음 설치 + 서버 실행 (더블클릭)
+   ├─ 엑셀_다시_불러오기.bat
+   ├─ 작동가이드.html           이 문서
+   ├─ server.py                 로컬 서버: 웹 화면 · API · 제스처 이벤트(SSE)
+   ├─ gesture.py                OpenCV + MediaPipe 손 스와이프 판정
+   ├─ import_excel.py           엑셀 → data/yeoun.db + 이미지
+   ├─ db.py                     SQLite DB (표 만들기 · 읽기 · 저장)
+   ├─ setup_assets.py           three.js · 손 인식 모델 내려받기
+   ├─ config.json               포트 · 엑셀 경로 · 관리자 PIN · 제스처 감도
+   ├─ requirements.txt          opencv-python · mediapipe · pillow
+   ├─ models/hand_landmarker.task   (setup_assets.py가 받음)
+   ├─ data/
+   │   ├─ yeoun.db              SQLite DB: rooms · artists · artworks · locations · likes · comments · events
+   │   └─ images/full · thumb   감상용(긴 변 1600px) · 목록용(400px)
+   └─ web/
+       ├─ index.html            3D 전시관
+       ├─ admin.html            관리자 페이지
+       ├─ css/gallery.css
+       ├─ js/floorplan.js       평면 좌표 · 작품 걸 자리 · 감상 지점 계산
+       ├─ js/gallery.js         Three.js 장면 · 시점 이동 · 작품 카드 · 반응 · 제스처 연결
+       └─ vendor/               three.js r147 (setup_assets.py가 받음)</pre>
+  </section>
+
+  <section id="s10"><h2><span class="n">10</span>문제 해결</h2>
+    <table>
+      <tr><th>증상</th><th>해결</th></tr>
+      <tr><td>"서버에 연결할 수 없어요"</td><td>index.html을 직접 연 경우예요. <code>시작하기.bat</code>로 서버를 켜고 <code>http://127.0.0.1:8000</code>으로 열어요.</td></tr>
+      <tr><td>"3D 라이브러리를 불러오지 못했어요"</td><td>인터넷 연결 확인 후 <code>python setup_assets.py</code>를 실행해 <code>web/vendor</code>에 파일을 받아요.</td></tr>
+      <tr><td>제스처 상태가 '오류 · OpenCV/MediaPipe가 설치되어 있지 않아요'</td><td><code>python -m pip install -r requirements.txt</code>. 설치 실패 시 Python 3.11로 다시 설치해요.</td></tr>
+      <tr><td>'손 인식 모델이 없어요'</td><td><code>python setup_assets.py</code>. 안 되면 아래 주소의 파일을 받아 <code>models/hand_landmarker.task</code>로 저장해요.<br><code class="muted">https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task</code></td></tr>
+      <tr><td>'웹캠을 열 수 없어요'</td><td>Zoom·카메라 앱 등 다른 프로그램을 끄고, Windows 설정 → 개인 정보 → 카메라 접근을 허용해요. 외장 웹캠이면 <code>camera_index</code>를 1로.</td></tr>
+      <tr><td>손을 기울여도 안 넘어감</td><td>손바닥 전체가 화면에 보이게 펴고, 먼저 손을 똑바로 세워 점이 보라색이 되게 한 뒤 기울여요. 슬라이더에서 '넘김 각도'를 낮춰요.</td></tr>
+      <tr><td>카메라 화면이 안 보임</td><td>제스처 모드가 켜져 있는지, 설정의 '카메라 화면 보기'가 켜져 있는지 확인. 다른 PC에서 접속한 경우에는 보이지 않아요(보안).</td></tr>
+      <tr><td>반대로 넘어감</td><td><code>config.json</code>의 <code>mirror</code>를 <code>false</code>로 (카메라가 이미 좌우 반전된 영상을 줄 때).</td></tr>
+      <tr><td>포트 8000이 사용 중</td><td>서버가 자동으로 8001~8009를 찾아요. 서버 창에 나온 주소로 접속해요.</td></tr>
+      <tr><td>작품이 흐리거나 비율이 이상함</td><td>엑셀에 작은 미리보기만 있는 작품이에요(관리자 '비율 확인 필요'). 원본 사진으로 '이미지 교체'해요.</td></tr>
+    </table>
+  </section>
+
+  <section id="s11"><h2><span class="n">11</span>꼭 지킬 원칙 (발표 때도 이렇게 설명)</h2>
+    <ul>
+      <li><b>AI 두 가지를 구분해요.</b> 이 프로젝트의 AI는 <b>웹캠 손 인식(MediaPipe)</b>뿐이에요. 소개문 초안은 엑셀 '작품 설명'을 옮겨 정리한 것이고 <b>AI가 쓴 글이 아니에요</b>. "MediaPipe로 소개문도 만들었다"고 말하지 않아요.</li>
+      <li><b>지어내지 않아요.</b> 작가의 의도 · 이력 · 작품 이야기는 제공 자료에 있는 것만 써요. 실제 자료가 없는 작품 · 작가 · 장소에는 <b>'예시'</b>를 표시해요.</li>
+      <li><b>위치를 구분해요.</b> '가상 전시 위치(예: 2전시실 7번 자리)'는 온라인 전시관 안의 자리이고, '실제 위치(예: HQ 식당 / 창고 보관)'는 담당자가 입력한 사내 보관·설치 장소예요.</li>
+      <li><b>반응 수를 과장하지 않아요.</b> 관심 · 한마디 수는 온라인 관람 참여 기록이에요. 사회공헌 효과 전체로 해석하지 않아요.</li>
+      <li><b>작가 정보를 보호해요.</b> 공개 화면은 익명 표시명이 기본이고, 실명 공개는 동의를 확인한 경우에만 켜요. 작가 사진은 쓰지 않아요.</li>
+      <li><b>범위 밖</b>: 결제 · 기부 처리 · 회원가입 · 사내 시스템 연동 · VR · 자유 걷기 · 멀티플레이.</li>
+    </ul>
+  </section>
+
+  <section id="s12"><h2><span class="n">12</span>바뀐 규칙 · 다음 단계</h2>
+    <h3>기존 'index.html 한 파일, 외부 설치 없음' 규칙에서 바뀐 점</h3>
+    <table>
+      <tr><th>기존</th><th>지금</th></tr>
+      <tr><td>index.html 한 파일</td><td>Python 3개(server · gesture · import_excel) + 웹 페이지 2개(전시관 · 관리자) + js/css</td></tr>
+      <tr><td>외부 설치 없음</td><td>전시관 · 관리자 화면은 표준 Python만으로 동작. <b>제스처</b>에는 opencv-python · mediapipe, 이미지 처리에는 pillow 설치 필요</td></tr>
+      <tr><td>파일 더블클릭</td><td><code>시작하기.bat</code> → 로컬 서버 <code>127.0.0.1:8000</code></td></tr>
+      <tr><td>CDN의 three.js</td><td><code>web/vendor</code>에 받아 두고, 없으면 CDN으로 자동 대체</td></tr>
+      <tr><td>브라우저에 데이터 저장</td><td>서버가 SQLite DB <code>data/yeoun.db</code>에 저장 (내 관심 목록만 브라우저에 기억)</td></tr>
+      <tr><td>웹에는 명령만 전달</td><td>명령 + <b>카메라 화면(같은 PC 브라우저에만, 저장 안 함)</b></td></tr>
+    </table>
+    <h3>인터넷 배포는 별도 단계</h3>
+    <div class="warn">지금 구조는 <b>Python과 브라우저가 같은 PC</b>에 있는 로컬 시연용이에요. 서버는 127.0.0.1에만 열려요. 이 서버를 인터넷에 그대로 올리면 <b>서버 PC의 웹캠</b>이 켜질 뿐 방문자의 웹캠이 아니에요. 배포할 때는 손 인식을 방문자 브라우저 안(MediaPipe for Web)으로 옮기고, 관리자 로그인 · HTTPS · 반응 저장소를 따로 준비해야 해요.</div>
+    <h3>시간이 남으면</h3>
+    <ul><li>작품별 음성 해설(승인된 소개문 읽어 주기)</li><li>GitHub 저장소에는 실명·사내 위치가 든 DB와 엑셀을 올리지 않아요. 받은 사람은 엑셀을 상위 폴더에 두고 <code>엑셀_다시_불러오기.bat</code>로 DB를 만들어요.</li><li>전시실 배정 순서 끌어서 바꾸기</li><li>브라우저용 손 인식(배포 준비)</li></ul>
+  </section>
+  <p class="muted" style="text-align:center">여운 — 손짓으로 만나는 3D 전시관 · 4팀 44xla</p>
+</main>
+</body>
+</html>

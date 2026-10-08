@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>여운 관리자 — 작품·소개문·반응 관리</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --violet:#7c3aed; --violet-d:#5b21b6; --violet-l:#ede9fe; --violet-m:#c4b5fd;
+      --ink:#18181b; --g7:#3f3f46; --g5:#71717a; --g4:#a1a1aa; --g2:#e4e4e7; --g1:#f4f4f5; --bg:#fafafa;
+      --amber:#b45309; --amber-l:#fff7ed; --red:#dc2626; --red-l:#fee2e2; --radius:12px; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Noto Sans KR','Malgun Gothic',system-ui,sans-serif; color:var(--ink); background:var(--bg); font-size:14px; }
+    button, input, select, textarea { font:inherit; color:inherit; }
+    button { cursor:pointer; }
+    [hidden] { display:none !important; }
+    :focus-visible { outline:3px solid var(--violet-m); outline-offset:2px; }
+    header { position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:14px; padding:12px 24px; background:#fff; border-bottom:1px solid var(--g2); }
+    .logo { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; background:var(--violet); color:#fff; font-weight:700; font-size:13px; }
+    header h1 { margin:0; font-size:17px; }
+    header p { margin:0; font-size:12px; color:var(--g5); }
+    header .sp { flex:1; }
+    nav.tabs { display:flex; gap:4px; padding:0 24px; background:#fff; border-bottom:1px solid var(--g2); overflow-x:auto; position:sticky; top:63px; z-index:4; }
+    nav.tabs button { border:0; background:none; padding:12px 14px; font-weight:500; color:var(--g5); border-bottom:2px solid transparent; white-space:nowrap; }
+    nav.tabs button[aria-selected="true"] { color:var(--violet-d); border-color:var(--violet); }
+    main { max-width:1280px; margin:0 auto; padding:20px 24px 60px; }
+    .btn { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 14px; border:1px solid var(--g2); border-radius:9px; background:#fff; font-weight:500; }
+    .btn:hover { background:var(--g1); }
+    .btn.primary { background:var(--violet); border-color:var(--violet); color:#fff; }
+    .btn.primary:hover { background:var(--violet-d); }
+    .btn.small { min-height:28px; padding:3px 10px; font-size:12.5px; }
+    .btn.danger { color:var(--red); }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .card { background:#fff; border:1px solid var(--g2); border-radius:var(--radius); padding:16px; }
+    .grid { display:grid; gap:14px; }
+    .kpis { grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+    .kpi .lbl { font-size:12.5px; color:var(--g5); }
+    .kpi .val { font-size:28px; font-weight:700; margin-top:4px; }
+    .kpi .sub { font-size:12px; color:var(--g5); margin-top:2px; }
+    .two { grid-template-columns:1fr 1fr; }
+    @media (max-width:900px){ .two { grid-template-columns:1fr; } }
+    h2 { font-size:16px; margin:0 0 12px; }
+    h3 { font-size:14px; margin:0 0 10px; color:var(--g7); }
+    .note { font-size:12.5px; color:var(--g5); line-height:1.6; }
+    .note.box { padding:10px 12px; background:var(--violet-l); color:var(--violet-d); border-radius:9px; }
+    .bars { display:grid; gap:8px; }
+    .bar { display:grid; grid-template-columns:120px 1fr 64px; gap:10px; align-items:center; font-size:13px; }
+    .bar .track { height:12px; background:var(--g1); border-radius:99px; overflow:hidden; }
+    .bar .fill { height:100%; background:var(--violet); border-radius:99px; }
+    .bar .fill.amber { background:#f59e0b; } .bar .fill.gray { background:var(--g4); }
+    .bar .n { text-align:right; color:var(--g7); font-variant-numeric:tabular-nums; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { padding:8px 8px; border-bottom:1px solid var(--g2); text-align:left; vertical-align:middle; }
+    th { font-size:12px; color:var(--g5); font-weight:500; position:sticky; top:110px; background:#fff; z-index:1; }
+    tr:hover td { background:#fcfbff; }
+    td img { width:56px; height:42px; object-fit:contain; background:var(--g1); border-radius:5px; display:block; }
+    td select, td input[type=text] { min-height:30px; padding:3px 6px; border:1px solid var(--g2); border-radius:7px; background:#fff; max-width:100%; }
+    .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:12px; }
+    .toolbar input[type=search], .toolbar select { min-height:36px; padding:6px 10px; border:1px solid var(--g2); border-radius:9px; background:#fff; }
+    .toolbar input[type=search] { min-width:240px; }
+    .pill { display:inline-block; padding:1px 8px; border-radius:6px; font-size:11.5px; font-weight:700; white-space:nowrap; }
+    .p-ok { background:var(--violet-l); color:var(--violet-d); }
+    .p-draft { background:var(--amber-l); color:var(--amber); }
+    .p-none, .p-gray { background:var(--g1); color:var(--g5); }
+    .p-rej { background:var(--red-l); color:var(--red); }
+    .p-warn { background:var(--amber-l); color:var(--amber); }
+    .review { display:grid; grid-template-columns:300px 1fr; gap:16px; }
+    @media (max-width:900px){ .review { grid-template-columns:1fr; } }
+    .rlist { max-height:72vh; overflow:auto; display:grid; gap:4px; align-content:start; }
+    .rlist button { display:flex; align-items:center; gap:8px; padding:6px; border:0; border-radius:8px; background:none; text-align:left; width:100%; }
+    .rlist button:hover { background:var(--g1); }
+    .rlist button.on { background:var(--violet-l); }
+    .rlist img { width:44px; height:34px; object-fit:contain; background:var(--g1); border-radius:4px; flex:none; }
+    .rlist .t { flex:1; min-width:0; font-size:13px; }
+    .rlist .t b { display:block; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .editor img.big { max-width:100%; max-height:300px; object-fit:contain; background:var(--g1); border-radius:8px; display:block; margin-bottom:12px; }
+    .src { white-space:pre-line; padding:10px 12px; background:var(--g1); border-radius:8px; font-size:13px; line-height:1.7; max-height:220px; overflow:auto; }
+    textarea { width:100%; min-height:180px; padding:10px 12px; border:1px solid var(--g2); border-radius:9px; line-height:1.7; resize:vertical; }
+    textarea:focus, input:focus, select:focus { outline:none; border-color:var(--violet); box-shadow:0 0 0 3px var(--violet-l); }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .form { display:grid; gap:12px; max-width:720px; }
+    .form label { display:grid; gap:4px; font-weight:500; font-size:13px; }
+    .form input[type=text], .form select, .form input[type=file] { min-height:38px; padding:6px 10px; border:1px solid var(--g2); border-radius:9px; background:#fff; font-weight:400; }
+    .form .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .preview { max-width:320px; max-height:240px; object-fit:contain; background:var(--g1); border-radius:8px; }
+    .comments { display:grid; gap:8px; }
+    .cm { display:grid; grid-template-columns:48px 1fr auto; gap:10px; align-items:center; padding:8px; border:1px solid var(--g2); border-radius:9px; background:#fff; }
+    .cm img { width:48px; height:36px; object-fit:contain; background:var(--g1); border-radius:4px; }
+    .cm.hidden { opacity:.5; }
+    .cm .meta { font-size:12px; color:var(--g5); }
+    .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%,10px); padding:10px 16px; border-radius:10px; background:var(--ink); color:#fff; opacity:0; transition:.2s; pointer-events:none; z-index:50; }
+    .toast.show { opacity:1; transform:translate(-50%,0); }
+    .login { max-width:360px; margin:12vh auto; text-align:center; }
+    .login input { width:100%; min-height:44px; padding:8px 12px; border:1px solid var(--g2); border-radius:10px; text-align:center; font-size:18px; letter-spacing:.3em; margin:12px 0; }
+    .muted { color:var(--g5); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">여운</div>
+    <div><h1>여운 관리자</h1><p id="hdrMeta">작품 · 소개문 · 관람 반응 관리</p></div>
+    <div class="sp"></div>
+    <a class="btn" href="/" target="_blank">3D 전시관 열기</a>
+    <button class="btn" id="logoutBtn" hidden>잠금</button>
+  </header>
+
+  <section id="login" class="login card">
+    <h2>관리자 PIN</h2>
+    <p class="note">담당자만 쓰는 화면이에요. PIN은 <b>config.json</b>의 <code>admin_pin</code>에서 바꿀 수 있어요.</p>
+    <form id="loginForm"><input id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="관리자 PIN"><button class="btn primary" style="width:100%">들어가기</button></form>
+    <p id="loginErr" class="note" style="color:var(--red)"></p>
+  </section>
+
+  <div id="app" hidden>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-tab="dash" aria-selected="true">현황판</button>
+      <button role="tab" data-tab="works">작품 관리</button>
+      <button role="tab" data-tab="intro">소개문 검토</button>
+      <button role="tab" data-tab="add">작품 등록</button>
+      <button role="tab" data-tab="react">관람 반응</button>
+      <button role="tab" data-tab="settings">설정 · 엑셀</button>
+    </nav>
+    <main>
+      <!-- 현황판 -->
+      <section data-panel="dash">
+        <div class="grid kpis" id="kpis"></div>
+        <div class="grid two" style="margin-top:14px">
+          <div class="card"><h2>보관 / 설치 상태</h2><div class="bars" id="barStatus"></div>
+            <p class="note">상태와 위치는 엑셀 '설치위치' 칸 기준이며, 담당자가 '작품 관리'에서 고칠 수 있어요.</p></div>
+          <div class="card"><h2>소개문 검토 현황</h2><div class="bars" id="barIntro"></div>
+            <p class="note">승인된 소개문만 전시관에 공개돼요. 초안은 엑셀 '작품 설명'(제공 자료)을 옮긴 것이며 AI가 쓴 글이 아니에요.</p></div>
+          <div class="card"><h2>전시실별 작품 수</h2><div class="bars" id="barRooms"></div></div>
+          <div class="card"><h2>관심이 많은 작품</h2><div class="bars" id="barTop"></div>
+            <p class="note">관심·한마디 수는 온라인 관람 참여 기록이에요. 사회공헌 효과 전체를 뜻하지는 않아요.</p></div>
+        </div>
+        <div class="card" style="margin-top:14px"><h2>확인이 필요한 항목</h2><div id="todo" class="note"></div></div>
+      </section>
+
+      <!-- 작품 관리 -->
+      <section data-panel="works" hidden>
+        <div class="toolbar">
+          <input type="search" id="wq" placeholder="작품명 · 작가 · 위치 검색">
+          <select id="wRoom"><option value="">모든 전시실</option></select>
+          <select id="wStatus"><option value="">모든 상태</option><option>보관 중</option><option>설치됨</option><option>대여·외부 전시</option><option>확인 필요</option></select>
+          <select id="wFlag"><option value="">전체</option><option value="ratio">이미지 비율 확인 필요</option><option value="noimg">이미지 없음</option><option value="offline">전시 제외</option></select>
+          <span class="muted" id="wCount"></span>
+        </div>
+        <div class="card" style="padding:0; overflow:auto">
+          <table>
+            <thead><tr><th>이미지</th><th>작품</th><th>작가 표시명</th><th>상태</th><th>현재 위치 (실제)</th><th>가상 전시실</th><th>공개</th><th></th></tr></thead>
+            <tbody id="wBody"></tbody>
+          </table>
+        </div>
+        <datalist id="placeList"></datalist>
+      </section>
+
+      <!-- 소개문 검토 -->
+      <section data-panel="intro" hidden>
+        <div class="toolbar">
+          <select id="iFilter"><option value="draft">검토 대기</option><option value="approved">승인됨</option><option value="rejected">보류</option><option value="none">자료 없음</option><option value="">전체</option></select>
+          <select id="iRoom"><option value="">모든 전시실</option></select>
+          <button class="btn" id="bulkApprove">보이는 초안 모두 승인</button>
+          <span class="muted" id="iCount"></span>
+        </div>
+        <div class="review">
+          <div class="card rlist" id="iList"></div>
+          <div class="card editor" id="iEditor"><p class="muted">왼쪽에서 작품을 고르세요.</p></div>
+        </div>
+      </section>
+
+      <!-- 작품 등록 -->
+      <section data-panel="add" hidden>
+        <div class="card">
+          <h2>새 작품 등록</h2>
+          <p class="note box">실제 자료가 없는 시연용 작품은 '예시 자료'를 체크해 두세요. 전시관에 '예시 자료' 표시가 붙어요. 작가의 의도·이력은 지어내지 말고, 받은 자료만 적어 주세요.</p>
+          <form id="addForm" class="form" style="margin-top:12px">
+            <div class="two-col">
+              <label>작품명 *<input type="text" name="title" required maxlength="80"></label>
+              <label>작가 표시명 * <small class="muted">실명 대신 익명·예시 이름 권장</small><input type="text" name="artist" required maxlength="30" placeholder="예: 작가 A, 예시 작가"></label>
+            </div>
+            <div class="two-col">
+              <label>제작연도<input type="text" name="year" maxlength="10"></label>
+              <label>주제(테마)<input type="text" name="theme" maxlength="20" placeholder="자연 · 이야기 · 가족 · 감정"></label>
+            </div>
+            <div class="two-col">
+              <label>재료<input type="text" name="material" maxlength="80"></label>
+              <label>크기<input type="text" name="size" maxlength="40" placeholder="예: 53*45.5"></label>
+            </div>
+            <div class="two-col">
+              <label>가상 전시실<select name="room" id="addRoom"></select></label>
+              <label>현재 위치 (실제)<input type="text" name="location" list="placeList" maxlength="60" placeholder="예: 창고 보관"></label>
+            </div>
+            <label>기초 설명 (제공 자료) <textarea name="desc" maxlength="2000" placeholder="받은 자료에 있는 설명만 적어 주세요. 저장하면 '검토 대기' 초안이 되고, 승인해야 공개돼요."></textarea></label>
+            <label>작품 이미지 * (PNG·JPG, 비율·색 그대로 저장)<input type="file" name="image" accept="image/png,image/jpeg,image/webp" required></label>
+            <img id="addPreview" class="preview" hidden alt="미리보기">
+            <label style="display:flex; gap:8px; align-items:center; font-weight:400"><input type="checkbox" name="is_example" checked> 예시 자료로 표시</label>
+            <div><button class="btn primary">등록하기</button></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- 관람 반응 -->
+      <section data-panel="react" hidden>
+        <div class="grid kpis" id="rKpis"></div>
+        <div class="grid two" style="margin-top:14px">
+          <div class="card"><h2>최근 한마디</h2>
+            <div class="toolbar"><select id="cRoom"><option value="">모든 전시실</option></select><label class="muted"><input type="checkbox" id="cShowHidden"> 숨긴 한마디도 보기</label></div>
+            <div class="comments" id="cList"></div></div>
+          <div class="card"><h2>작품별 관심</h2><div class="bars" id="rTop"></div>
+            <p class="note">관심 저장 수 = 방문자가 '관심 저장'을 누른 횟수(취소 반영). 같은 사람이 여러 브라우저에서 누르면 중복될 수 있어요.</p>
+            <div style="margin-top:16px"><button class="btn danger" id="resetReact">시연 전 반응 기록 초기화</button></div></div>
+        </div>
+      </section>
+
+      <!-- 설정 -->
+      <section data-panel="settings" hidden>
+        <div class="grid two">
+          <div class="card"><h2>엑셀 다시 불러오기</h2>
+            <p class="note" id="excelInfo"></p>
+            <p class="note">엑셀을 고친 뒤 누르면 작품 정보·이미지를 다시 읽어요. 여기서 고친 위치·소개문 승인·전시실 배정·작가 표시명은 그대로 유지돼요. (엑셀 원문 설명이 바뀐 작품은 소개문이 다시 '검토 대기'가 돼요)</p>
+            <button class="btn primary" id="reimport">엑셀 다시 불러오기</button></div>
+          <div class="card"><h2>전시실 이름 · 테마</h2><div id="roomEdit" class="form"></div>
+            <button class="btn primary" id="saveRooms" style="margin-top:10px">전시실 정보 저장</button></div>
+          <div class="card" style="grid-column:1/-1"><h2>작가 표시명</h2>
+            <p class="note box">공개 화면에는 기본으로 익명 표시명(예: 강○혜)이 나가요. 작가 본인(또는 보호자·소속 기관)의 <b>실명 공개 동의를 확인한 경우에만</b> '실명 공개'를 켜 주세요.</p>
+            <table style="margin-top:10px"><thead><tr><th>실명 (관리자만 보임)</th><th>표시명</th><th>작품 수</th><th>실명 공개</th><th></th></tr></thead><tbody id="aBody"></tbody></table></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let PIN = '';
+  try { PIN = sessionStorage.getItem('yeoun.pin') || ''; } catch (e) {}
+  let D = null;           // 관리자 데이터
+  let selIntro = null;
+
+  function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200); }
+  async function api(path, body) {
+    const opt = { headers: { 'X-Admin-Pin': PIN } };
+    if (body !== undefined) { opt.method = 'POST'; opt.headers['Content-Type'] = 'application/json'; opt.body = JSON.stringify(body); }
+    const r = await fetch(path, opt);
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401) { lock(); throw new Error(j.error || 'PIN 오류'); }
+    if (!r.ok || j.ok === false) throw new Error(j.error || 'HTTP ' + r.status);
+    return j;
+  }
+  function lock() { PIN = ''; try { sessionStorage.removeItem('yeoun.pin'); } catch (e) {} $('app').hidden = true; $('login').hidden = false; $('logoutBtn').hidden = true; }
+  async function load() {
+    D = await api('/api/admin/data');
+    $('login').hidden = true; $('app').hidden = false; $('logoutBtn').hidden = false;
+    const m = D.meta || {};
+    $('hdrMeta').textContent = `엑셀: ${m.source_file || '-'} · 불러온 시각 ${String(m.imported_at || '').replace('T', ' ')}`;
+    renderAll();
+  }
+  $('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); PIN = $('pin').value.trim();
+    try { await load(); try { sessionStorage.setItem('yeoun.pin', PIN); } catch (er) {} $('loginErr').textContent = ''; }
+    catch (err) { $('loginErr').textContent = err.message; }
+  });
+  $('logoutBtn').addEventListener('click', lock);
+
+  // 탭
+  document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-tab]').forEach((x) => x.setAttribute('aria-selected', x === b));
+    document.querySelectorAll('[data-panel]').forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.tab; });
+  }));
+
+  // 도우미
+  const works = () => D.artworks;
+  const room = (id) => D.rooms.find((r) => r.id === id) || { name: '-', theme: '' };
+  const artist = (w) => D.artists[w.artist_id] || {};
+  const dispName = (w) => { const a = artist(w); return a.name_public && a.real_name ? a.real_name : (a.display_name || '작가 미상'); };
+  const img = (w) => w.image ? `/images/${w.image.thumb.replace(/^images\//, '')}${w.image.ver ? '?v=' + w.image.ver : ''}` : '';
+  const fullImg = (w) => w.image ? `/images/${w.image.full.replace(/^images\//, '')}${w.image.ver ? '?v=' + w.image.ver : ''}` : '';
+  const INTRO = { approved: ['승인됨', 'p-ok'], draft: ['검토 대기', 'p-draft'], rejected: ['보류', 'p-rej'], none: ['자료 없음', 'p-none'] };
+  const introPill = (w) => { const s = (w.intro && w.intro.status) || 'none'; const [t, c] = INTRO[s] || INTRO.none; return `<span class="pill ${c}">${t}</span>`; };
+  function bars(el, rows, max, cls = '') {
+    max = max || Math.max(1, ...rows.map((r) => r[1]));
+    el.innerHTML = rows.map(([label, n, c]) => `<div class="bar"><span>${esc(label)}</span><div class="track"><div class="fill ${c || cls}" style="width:${(n / max) * 100}%"></div></div><span class="n">${n}</span></div>`).join('') || '<p class="muted">아직 기록이 없어요.</p>';
+  }
+  function fillRoomSelects() {
+    ['wRoom', 'iRoom', 'cRoom'].forEach((id) => {
+      const s = $(id), v = s.value;
+      s.innerHTML = '<option value="">모든 전시실</option>' + D.rooms.map((r) => `<option value="${r.id}">${esc(r.name)} · ${esc(r.theme)}</option>`).join('');
+      s.value = v;
+    });
+    $('addRoom').innerHTML = D.rooms.map((r) => `<option value="${r.id}">${esc(r.name)} · ${esc(r.theme)}</option>`).join('');
+    const places = new Set(['창고 보관', ...(D.locations?.excel_values || []), ...(D.locations?.sheet || []).map((l) => `${l.group} ${l.place}`)]);
+    $('placeList').innerHTML = [...places].map((p) => `<option value="${esc(p)}">`).join('');
+  }
+  function renderAll() { fillRoomSelects(); renderDash(); renderWorks(); renderIntroList(); renderReact(); renderSettings(); }
+
+  // ---------- 현황판 ----------
+  function renderDash() {
+    const W = works(), R = D.reactions;
+    const online = W.filter((w) => w.online && w.image).length;
+    const approved = W.filter((w) => w.intro?.status === 'approved').length;
+    const likes = Object.values(R.likes || {}).reduce((a, b) => a + b, 0);
+    const comments = (R.comments || []).filter((c) => !c.hidden).length;
+    $('kpis').innerHTML = [
+      ['전체 작품', W.length, `작가 ${new Set(W.map((w) => w.artist_id)).size}명 · 엑셀 기준`],
+      ['온라인 전시 중', online, '이미지가 있고 공개로 둔 작품'],
+      ['소개문 승인', `${approved}`, `검토 대기 ${W.filter((w) => w.intro?.status === 'draft').length}점`],
+      ['관심 저장', likes, '관람 참여 기록'],
+      ['한마디', comments, '숨긴 것 제외'],
+    ].map(([l, v, s]) => `<div class="card kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+    const cnt = (f) => W.filter(f).length;
+    bars($('barStatus'), [['보관 중', cnt((w) => w.status === '보관 중'), 'gray'], ['설치됨', cnt((w) => w.status === '설치됨')], ['대여·외부 전시', cnt((w) => w.status === '대여·외부 전시')], ['확인 필요', cnt((w) => w.status === '확인 필요'), 'amber']], W.length);
+    bars($('barIntro'), [['승인됨', approved], ['검토 대기', cnt((w) => w.intro?.status === 'draft'), 'amber'], ['보류', cnt((w) => w.intro?.status === 'rejected'), 'gray'], ['자료 없음', cnt((w) => !w.intro || w.intro.status === 'none'), 'gray']], W.length);
+    bars($('barRooms'), D.rooms.map((r) => [`${r.name} · ${r.theme}`, cnt((w) => w.room === r.id && w.online && w.image)]));
+    const top = Object.entries(R.likes || {}).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).slice(0, 6)
+      .map(([id, n]) => { const w = W.find((x) => x.id === id); return [w ? w.title : id, n]; });
+    bars($('barTop'), top);
+    const todo = [];
+    const noLoc = cnt((w) => w.status === '확인 필요'); if (noLoc) todo.push(`현재 위치가 비어 있는 작품 <b>${noLoc}점</b> → 작품 관리에서 '확인 필요'로 걸러 위치를 입력해 주세요.`);
+    const ratio = cnt((w) => w.image && w.image.ratio_ok === false); if (ratio) todo.push(`엑셀에 칸 크기로 눌린 미리보기만 있는 작품 <b>${ratio}점</b> → 원본 사진으로 교체하면 비율이 정확해져요. (작품 관리 → '이미지 비율 확인 필요')`);
+    const noImg = cnt((w) => !w.image); if (noImg) todo.push(`이미지가 없는 작품 <b>${noImg}점</b>은 전시관에 걸리지 않아요.`);
+    const draft = cnt((w) => w.intro?.status === 'draft'); if (draft) todo.push(`소개문 검토 대기 <b>${draft}점</b> → 승인 전에는 '소개문 검토 중'으로 보여요.`);
+    const repl = cnt((w) => w.intro?.name_replaced); if (repl) todo.push(`원문에 작가 실명이 있어 표시명으로 바꾼 초안 <b>${repl}점</b> → 소개문 검토에서 확인해 주세요.`);
+    $('todo').innerHTML = todo.length ? '<ul style="margin:0;padding-left:18px">' + todo.map((t) => `<li>${t}</li>`).join('') + '</ul>' : '확인이 필요한 항목이 없어요.';
+  }
+
+  // ---------- 작품 관리 ----------
+  ['wq', 'wRoom', 'wStatus', 'wFlag'].forEach((id) => $(id).addEventListener('input', renderWorks));
+  function renderWorks() {
+    const q = $('wq').value.trim().toLowerCase(), rf = $('wRoom').value, sf = $('wStatus').value, ff = $('wFlag').value;
+    const list = works().filter((w) => {
+      if (rf && String(w.room) !== rf) return false;
+      if (sf && w.status !== sf) return false;
+      if (ff === 'ratio' && !(w.image && w.image.ratio_ok === false)) return false;
+      if (ff === 'noimg' && w.image) return false;
+      if (ff === 'offline' && w.online) return false;
+      if (q && !`${w.title} ${dispName(w)} ${artist(w).real_name || ''} ${w.location} ${w.theme}`.toLowerCase().includes(q)) return false;
+      return true;
+    }).sort((a, b) => a.room - b.room || a.order - b.order);
+    $('wCount').textContent = `${list.length}점`;
+    const roomOpts = (sel) => D.rooms.map((r) => `<option value="${r.id}" ${r.id === sel ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
+    const stOpts = (sel) => ['보관 중', '설치됨', '대여·외부 전시', '확인 필요'].map((s) => `<option ${s === sel ? 'selected' : ''}>${s}</option>`).join('');
+    $('wBody').innerHTML = list.map((w) => `<tr data-id="${w.id}">
+      <td>${w.image ? `<img src="${img(w)}" alt="">` : '<span class="pill p-gray">없음</span>'}</td>
+      <td><b>${esc(w.title)}</b><br><small class="muted">${esc([w.year, w.theme, w.size].filter(Boolean).join(' · '))}</small>
+        ${w.image && w.image.ratio_ok === false ? '<br><span class="pill p-warn" title="엑셀 칸 크기에 맞춰 눌린 미리보기라 원본 비율과 다를 수 있어요">비율 확인 필요</span>' : ''}
+        ${w.is_example ? '<span class="pill p-warn">예시</span>' : ''}</td>
+      <td>${esc(dispName(w))}<br><small class="muted">${esc(artist(w).real_name || '')}</small></td>
+      <td><select data-f="status">${stOpts(w.status)}</select></td>
+      <td><input type="text" data-f="location" list="placeList" value="${esc(w.location)}" placeholder="위치 입력"><br><small class="muted">${w.location_source === 'admin' ? '담당자 수정 ' + esc(String(w.location_updated_at).replace('T', ' ').slice(0, 16)) : '엑셀: ' + esc(w.excel_location || '빈칸')}</small></td>
+      <td><select data-f="room">${roomOpts(w.room)}</select><br><small class="muted">${w.order + 1}번째</small></td>
+      <td><input type="checkbox" data-f="online" ${w.online ? 'checked' : ''} ${w.image ? '' : 'disabled'} aria-label="전시관 공개"></td>
+      <td><label class="btn small">이미지 교체<input type="file" accept="image/png,image/jpeg,image/webp" data-f="image" hidden></label></td>
+    </tr>`).join('');
+  }
+  $('wBody').addEventListener('change', async (e) => {
+    const tr = e.target.closest('tr'); if (!tr) return;
+    const id = tr.dataset.id, f = e.target.dataset.f;
+    try {
+      if (f === 'image') {
+        const file = e.target.files[0]; if (!file) return;
+        const data = await readFile(file);
+        await api(`/api/admin/work/${id}/image`, { image: data });
+        toast('이미지를 교체했어요');
+      } else {
+        const v = f === 'online' ? e.target.checked : f === 'room' ? Number(e.target.value) : e.target.value;
+        await api(`/api/admin/work/${id}`, { [f]: v });
+        toast(f === 'location' || f === 'status' ? '위치·상태를 저장했어요' : '저장했어요');
+      }
+      D = await api('/api/admin/data'); renderDash(); if (f === 'image' || f === 'room') renderWorks();
+    } catch (err) { toast(err.message); }
+  });
+  const readFile = (file) => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(file); });
+
+  // ---------- 소개문 ----------
+  ['iFilter', 'iRoom'].forEach((id) => $(id).addEventListener('input', renderIntroList));
+  function introItems() {
+    const f = $('iFilter').value, rf = $('iRoom').value;
+    return works().filter((w) => (!f || ((w.intro && w.intro.status) || 'none') === f) && (!rf || String(w.room) === rf))
+      .sort((a, b) => a.room - b.room || a.order - b.order);
+  }
+  function renderIntroList() {
+    const list = introItems();
+    $('iCount').textContent = `${list.length}점`;
+    $('iList').innerHTML = list.map((w) => `<button data-id="${w.id}" class="${w.id === selIntro ? 'on' : ''}">${w.image ? `<img src="${img(w)}" alt="">` : ''}<span class="t"><b>${esc(w.title)}</b><small class="muted">${esc(room(w.room).name)} · ${esc(dispName(w))}</small></span>${introPill(w)}</button>`).join('') || '<p class="muted">해당하는 작품이 없어요.</p>';
+    if (selIntro) renderEditor();
+  }
+  $('iList').addEventListener('click', (e) => { const b = e.target.closest('button[data-id]'); if (!b) return; selIntro = b.dataset.id; renderIntroList(); });
+  function renderEditor() {
+    const w = works().find((x) => x.id === selIntro); if (!w) return;
+    const it = w.intro || {};
+    $('iEditor').innerHTML = `
+      ${w.image ? `<img class="big" src="${fullImg(w)}" alt="">` : ''}
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(w.title)}</h2>${introPill(w)}</div>
+      <p class="muted">${esc(dispName(w))} · ${esc([w.year, w.theme, w.material, w.size].filter(Boolean).join(' · '))}</p>
+      <h3>제공 자료 (엑셀 '작품 설명' 원문)</h3>
+      <div class="src">${esc(it.source_text || '제공된 설명이 없어요.')}</div>
+      ${it.name_replaced ? '<p class="note" style="color:var(--amber)">원문에 작가 실명이 있어 초안에서는 표시명으로 바꿨어요.</p>' : ''}
+      <h3 style="margin-top:14px">공개할 소개문 (초안)</h3>
+      <p class="note">제공 자료에 있는 내용만 남겨 주세요. 작가의 의도·이력·이야기를 새로 지어 넣지 않아요.</p>
+      <textarea id="iText">${esc(it.draft || '')}</textarea>
+      <input type="text" id="iNote" placeholder="검토 메모 (관리자만 보임)" value="${esc(it.reviewer_note || '')}" style="width:100%;min-height:36px;margin-top:8px;padding:6px 10px;border:1px solid var(--g2);border-radius:9px">
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" data-act="approve">승인하고 공개</button>
+        <button class="btn" data-act="save">초안만 저장</button>
+        <button class="btn" data-act="reject">보류</button>
+        ${it.status === 'approved' ? '<button class="btn danger" data-act="unpublish">공개 취소</button>' : ''}
+      </div>
+      ${it.status === 'approved' ? `<p class="note">공개 중인 글 (승인 ${esc(String(it.approved_at || '').replace('T', ' '))})</p><div class="src">${esc(it.approved)}</div>` : ''}`;
+  }
+  $('iEditor').addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    try {
+      await api(`/api/admin/work/${selIntro}/intro`, { action: b.dataset.act, text: $('iText').value, note: $('iNote').value });
+      toast({ approve: '승인했어요. 전시관에 공개돼요', save: '초안을 저장했어요', reject: '보류했어요', unpublish: '공개를 취소했어요' }[b.dataset.act]);
+      D = await api('/api/admin/data');
+      if (b.dataset.act === 'approve' && $('iFilter').value === 'draft') {
+        const list = introItems(); selIntro = list.length ? list[0].id : null;
+      }
+      renderIntroList(); renderDash();
+    } catch (err) { toast(err.message); }
+  });
+  $('bulkApprove').addEventListener('click', async () => {
+    const ids = introItems().filter((w) => w.intro?.status === 'draft').map((w) => w.id);
+    if (!ids.length) return toast('승인할 초안이 없어요');
+    if (!confirm(`지금 목록의 초안 ${ids.length}점을 원문 그대로 승인할까요?\n(내용을 하나씩 확인한 뒤에 쓰는 것을 권장해요)`)) return;
+    try { const r = await api('/api/admin/intro/bulk', { ids, action: 'approve' }); toast(`${r.done}점을 승인했어요`); D = await api('/api/admin/data'); renderIntroList(); renderDash(); }
+    catch (err) { toast(err.message); }
+  });
+
+  // ---------- 등록 ----------
+  $('addForm').image.addEventListener('change', async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    $('addPreview').src = await readFile(f); $('addPreview').hidden = false;
+  });
+  $('addForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target, file = f.image.files[0];
+    if (!file) return toast('이미지를 골라 주세요');
+    try {
+      const body = { title: f.title.value, artist: f.artist.value, year: f.year.value, theme: f.theme.value, material: f.material.value,
+        size: f.size.value, room: Number(f.room.value), location: f.location.value, desc: f.desc.value, is_example: f.is_example.checked,
+        image: await readFile(file) };
+      const r = await api('/api/admin/work', body);
+      toast(`'${r.work.title}'을(를) 등록했어요. 소개문은 검토 후 공개돼요.`);
+      f.reset(); $('addPreview').hidden = true; f.is_example.checked = true;
+      D = await api('/api/admin/data'); renderAll();
+    } catch (err) { toast(err.message); }
+  });
+
+  // ---------- 반응 ----------
+  ['cRoom', 'cShowHidden'].forEach((id) => $(id).addEventListener('input', renderReact));
+  function renderReact() {
+    const R = D.reactions, W = works();
+    const likes = Object.values(R.likes || {}).reduce((a, b) => a + b, 0);
+    const today = new Date().toISOString().slice(0, 10);
+    const ev = R.events || [];
+    $('rKpis').innerHTML = [
+      ['관심 저장', likes, `오늘 +${ev.filter((e) => e.type === 'like' && e.at.startsWith(today)).length}`],
+      ['한마디', (R.comments || []).length, `오늘 +${ev.filter((e) => e.type === 'comment' && e.at.startsWith(today)).length}`],
+      ['반응이 있는 작품', new Set([...Object.keys(R.likes || {}).filter((k) => R.likes[k] > 0), ...(R.comments || []).map((c) => c.work)]).size, `전체 ${W.length}점 중`],
+    ].map(([l, v, s]) => `<div class="card kpi"><div class="lbl">${l}</div><div class="val">${v}</div><div class="sub">${s}</div></div>`).join('');
+    const rf = $('cRoom').value, sh = $('cShowHidden').checked;
+    const cs = (R.comments || []).filter((c) => (sh || !c.hidden)).filter((c) => { const w = W.find((x) => x.id === c.work); return !rf || (w && String(w.room) === rf); }).slice().reverse();
+    $('cList').innerHTML = cs.map((c) => { const w = W.find((x) => x.id === c.work) || { title: c.work };
+      return `<div class="cm ${c.hidden ? 'hidden' : ''}" data-id="${c.id}">${w.image ? `<img src="${img(w)}" alt="">` : '<span></span>'}<div><div>${esc(c.text)}</div><div class="meta">${esc(w.title)} · ${esc(String(c.at).replace('T', ' ').slice(0, 16))}</div></div>
+        <div class="row"><button class="btn small" data-act="${c.hidden ? 'show' : 'hide'}">${c.hidden ? '다시 보이기' : '숨기기'}</button><button class="btn small danger" data-act="delete">삭제</button></div></div>`; }).join('') || '<p class="muted">아직 한마디가 없어요.</p>';
+    const top = Object.entries(R.likes || {}).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).slice(0, 12)
+      .map(([id, n]) => { const w = W.find((x) => x.id === id); return [w ? w.title : id, n]; });
+    bars($('rTop'), top);
+  }
+  $('cList').addEventListener('click', async (e) => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    const id = b.closest('.cm').dataset.id, act = b.dataset.act;
+    if (act === 'delete' && !confirm('이 한마디를 삭제할까요?')) return;
+    try { await api(`/api/admin/comment/${id}`, act === 'delete' ? { delete: true } : { hidden: act === 'hide' }); D = await api('/api/admin/data'); renderReact(); renderDash(); }
+    catch (err) { toast(err.message); }
+  });
+  $('resetReact').addEventListener('click', async () => {
+    if (!confirm('관심 저장 수와 한마디를 모두 지울까요? (시연 리허설 뒤 초기화용)')) return;
+    try { await api('/api/admin/reactions/reset', {}); D = await api('/api/admin/data'); renderReact(); renderDash(); toast('반응 기록을 초기화했어요'); }
+    catch (err) { toast(err.message); }
+  });
+
+  // ---------- 설정 ----------
+  function renderSettings() {
+    const m = D.meta || {};
+    $('excelInfo').innerHTML = `파일: <b>${esc(m.source_file)}</b><br>시트: ${esc(m.source_sheet)} · 작품 ${m.counts?.works ?? '-'}점 (이미지 ${m.counts?.with_image ?? '-'}점)<br>불러온 시각: ${esc(String(m.imported_at || '').replace('T', ' '))}`;
+    $('roomEdit').innerHTML = D.rooms.map((r) => `<div class="two-col" data-id="${r.id}"><label>${r.id}번 이름<input type="text" data-k="name" value="${esc(r.name)}"></label><label>테마<input type="text" data-k="theme" value="${esc(r.theme)}"></label><label style="grid-column:1/-1">설명<input type="text" data-k="subtitle" value="${esc(r.subtitle || '')}"></label></div>`).join('');
+    $('aBody').innerHTML = Object.entries(D.artists).map(([id, a]) => `<tr data-id="${id}"><td>${esc(a.real_name || '(등록 작품)')}</td>
+      <td><input type="text" data-k="display_name" value="${esc(a.display_name)}" maxlength="30"></td>
+      <td>${works().filter((w) => w.artist_id === id).length}</td>
+      <td><label><input type="checkbox" data-k="name_public" ${a.name_public ? 'checked' : ''} ${a.real_name ? '' : 'disabled'}> 동의 확인됨</label></td>
+      <td><button class="btn small" data-save>저장</button></td></tr>`).join('');
+  }
+  $('aBody').addEventListener('click', async (e) => {
+    if (!e.target.matches('[data-save]')) return;
+    const tr = e.target.closest('tr');
+    try { await api(`/api/admin/artist/${tr.dataset.id}`, { display_name: tr.querySelector('[data-k=display_name]').value, name_public: tr.querySelector('[data-k=name_public]').checked });
+      D = await api('/api/admin/data'); renderAll(); toast('작가 표시명을 저장했어요'); } catch (err) { toast(err.message); }
+  });
+  $('saveRooms').addEventListener('click', async () => {
+    const rooms = [...document.querySelectorAll('#roomEdit [data-id]')].map((d) => ({ id: Number(d.dataset.id), name: d.querySelector('[data-k=name]').value, theme: d.querySelector('[data-k=theme]').value, subtitle: d.querySelector('[data-k=subtitle]').value }));
+    try { await api('/api/admin/rooms', { rooms }); D = await api('/api/admin/data'); renderAll(); toast('전시실 정보를 저장했어요'); } catch (err) { toast(err.message); }
+  });
+  $('reimport').addEventListener('click', async (e) => {
+    e.target.disabled = true; e.target.textContent = '불러오는 중…';
+    try { const r = await api('/api/admin/reimport', {}); D = await api('/api/admin/data'); renderAll(); toast(`엑셀을 다시 불러왔어요: 작품 ${r.meta.counts.works}점`); }
+    catch (err) { toast(err.message); }
+    e.target.disabled = false; e.target.textContent = '엑셀 다시 불러오기';
+  });
+
+  if (PIN) load().catch(() => lock()); else lock();
+})();
+</script>
+</body>
+</html>

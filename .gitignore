@@ -1,0 +1,18 @@
+# 개인정보·내부 자료 — 공개 저장소에 올리지 않음
+#   (작가 실명, 사내 설치 위치, 관리용 엑셀에서 꺼낸 작품 이미지)
+data/
+*.xlsx
+*.db
+*.db-*
+
+# 실행 중 생기는 파일
+__pycache__/
+*.pyc
+.setup_done
+.pipdone
+*.part
+*.tmp
+
+# setup_assets.py가 내려받는 파일
+models/*.task
+web/vendor/*.js

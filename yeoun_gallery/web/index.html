@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>여운 — 손짓으로 만나는 3D 전시관</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/gallery.css">
+</head>
+<body>
+  <div id="scene" aria-hidden="true"></div>
+  <div id="fade"></div>
+
+  <!-- 브랜드 -->
+  <header class="brand panel">
+    <div class="logo" aria-hidden="true">여운</div>
+    <div>
+      <h1>여운 <span>손짓으로 만나는 3D 전시관</span></h1>
+      <p id="brandSub">장애 예술인 작품 온라인 전시</p>
+    </div>
+  </header>
+
+  <!-- 상단 도구 -->
+  <nav class="topbar" aria-label="전시관 도구">
+    <button id="btnOverview" class="tb" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>
+      전시관 전체 보기
+    </button>
+    <button id="btnSearch" class="tb">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>
+      작품 찾기
+    </button>
+    <button id="btnLikes" class="tb">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+      내 관심 작품 <b id="myLikeCount">0</b>
+    </button>
+  </nav>
+
+  <!-- 첫 화면 안내 -->
+  <section id="introCard" class="intro-card panel" aria-labelledby="introTitle">
+    <p class="eyebrow">대덕전자 · 장애 예술인 보관 작품</p>
+    <h2 id="introTitle">창고에 있던 작품을<br>전시실에서 만나 보세요</h2>
+    <p id="introStats" class="stats"></p>
+    <button id="enterBtn" class="btn primary big">입장하기</button>
+    <ul class="how">
+      <li><b>클릭</b> 전시실을 눌러 들어가기</li>
+      <li><b>← →</b> 방향키·버튼으로 작품 넘기기</li>
+      <li><b>손짓</b> 제스처 모드에서 손을 좌우로 기울이기</li>
+    </ul>
+  </section>
+
+  <!-- 전시실 목록 (전체 보기) -->
+  <aside id="roomPanel" class="room-panel panel" aria-label="전시실 목록">
+    <h2>전시실</h2>
+    <ul id="roomList"></ul>
+    <div class="view-tools">
+      <button data-view="overview">전체</button>
+      <button data-view="top">평면</button>
+      <button data-view="walls" aria-pressed="false">벽 낮추기</button>
+      <button data-view="rotate" aria-pressed="false">회전</button>
+    </div>
+  </aside>
+
+  <!-- 제스처 -->
+  <section id="gesturePanel" class="gesture panel" aria-label="제스처 모드">
+    <div class="g-row">
+      <button id="gestureToggle" class="btn primary">제스처 모드 시작</button>
+      <span id="gState" class="state s-off" role="status" aria-live="polite">웹캠 꺼짐</span>
+      <button id="gSettingsBtn" class="icon-btn" aria-expanded="false" aria-controls="gSettings" title="인식 감도 설정">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+    </div>
+    <div id="camBox" class="cam" hidden>
+      <img id="camView" alt="웹캠 화면 (이 PC에서만 보임)">
+      <span class="cam-badge">이 PC에서만 보여요 · 저장 안 함</span>
+    </div>
+    <div class="tilt" aria-hidden="true">
+      <div class="tilt-track">
+        <div class="zone prev"></div><div class="zone neutral"></div><div class="zone next"></div>
+        <div id="tiltDot"></div>
+      </div>
+      <div class="tilt-labels"><span>← 이전 (왼쪽 기울이기)</span><b id="tiltVal">손 없음</b><span>(오른쪽) 다음 →</span></div>
+    </div>
+    <p id="gMsg" class="g-msg">카메라는 '제스처 모드 시작'을 눌렀을 때만 켜져요. 영상은 이 PC 안에서만 보여 주고 저장하지 않아요.</p>
+    <div id="gSettings" class="g-settings" hidden>
+      <label class="inline">인식 방식
+        <select id="sMode"><option value="tilt">손 기울이기</option><option value="swipe">좌우로 휘두르기</option></select></label>
+      <label class="inline"><span>카메라 화면 보기</span><input type="checkbox" id="sVideo"></label>
+      <label>넘김 각도 <output id="oTilt"></output>
+        <input type="range" id="sTilt" min="15" max="60" step="1"></label>
+      <label>기울인 채 유지 <output id="oHold"></output>
+        <input type="range" id="sHold" min="0" max="0.8" step="0.05"></label>
+      <label>넘긴 뒤 대기 <output id="oCool"></output>
+        <input type="range" id="sCool" min="0.5" max="2.5" step="0.1"></label>
+      <div class="test-row">
+        <span>카메라 없이 연결 확인</span>
+        <button class="btn small" data-test="PREV">← PREV</button>
+        <button class="btn small" data-test="NEXT">NEXT →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 작품 정보 -->
+  <aside id="workCard" class="work-card panel" hidden aria-live="polite">
+    <div class="wc-top">
+      <span id="wcRoom" class="chip"></span>
+      <span id="wcExample" class="chip example" hidden>예시 자료</span>
+      <button id="cardClose" class="icon-btn small" title="정보 접기" aria-label="작품 정보 접기">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+    <h2 id="wcTitle"></h2>
+    <p class="artist"><span id="wcArtist"></span><small id="wcArtistNote"></small></p>
+    <p id="wcMeta" class="meta"></p>
+    <div id="wcIntro" class="intro-text"></div>
+    <dl class="loc">
+      <div>
+        <dt>실제 위치</dt>
+        <dd><span id="wcStatus" class="badge"></span> <span id="wcLocation"></span><small id="wcLocDate"></small></dd>
+      </div>
+      <div>
+        <dt>가상 전시 위치</dt>
+        <dd id="wcVirtual"></dd>
+      </div>
+    </dl>
+    <div class="react">
+      <button id="likeBtn" class="btn like" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>
+        <span id="likeLabel">관심 저장</span> <b id="likeCount">0</b>
+      </button>
+      <button id="zoomBtn" class="btn ghost">크게 보기</button>
+    </div>
+    <form id="commentForm" class="comment" autocomplete="off">
+      <label for="commentInput">한마디 남기기</label>
+      <div class="row">
+        <input id="commentInput" maxlength="100" placeholder="작품을 보고 느낀 점을 짧게 남겨 주세요">
+        <button class="btn primary" type="submit">남기기</button>
+      </div>
+      <small id="commentCount">0 / 100</small>
+    </form>
+    <p class="fine">관심·한마디는 담당자가 관람 반응으로 확인해요.</p>
+  </aside>
+  <button id="cardOpen" class="card-open panel" hidden>작품 정보 보기</button>
+
+  <!-- 하단 이동 -->
+  <nav id="navBar" class="navbar panel" hidden aria-label="작품 이동">
+    <button id="prevBtn" class="btn"><span aria-hidden="true">←</span> 이전 작품</button>
+    <div class="counter" aria-live="polite">
+      <div><b id="cntCur">1</b> / <span id="cntTotal">1</span></div>
+      <small id="cntRoom"></small>
+    </div>
+    <button id="nextBtn" class="btn primary">다음 작품 <span aria-hidden="true">→</span></button>
+  </nav>
+
+  <!-- 검색 / 내 관심 -->
+  <div id="searchModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+    <div class="modal-box panel">
+      <div class="modal-head">
+        <div class="tabs" role="tablist">
+          <button role="tab" id="tabSearch" aria-selected="true">작품 찾기</button>
+          <button role="tab" id="tabLikes" aria-selected="false">내 관심 작품</button>
+        </div>
+        <button class="icon-btn" id="searchClose" aria-label="닫기">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <h2 id="searchTitle" class="sr-only">작품 찾기</h2>
+      <input id="searchInput" type="search" placeholder="작품명 · 작가 표시명 · 주제(예: 꽃, 가족, 호랑이)">
+      <p id="searchInfo" class="muted"></p>
+      <ul id="searchList" class="result-list"></ul>
+    </div>
+  </div>
+
+  <div id="lightbox" class="lightbox" hidden role="dialog" aria-modal="true" aria-label="작품 크게 보기">
+    <img id="lbImg" alt="">
+    <p id="lbCaption"></p>
+    <button id="lbClose" class="btn">닫기 (Esc)</button>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="tooltip" class="tooltip"></div>
+  <div id="loading" class="loading"><span></span><p id="loadingText">전시관을 준비하고 있어요…</p></div>
+
+  <!-- Three.js: vendor 폴더에 있으면 그것을, 없으면 인터넷(CDN)에서 불러온다 -->
+  <script>
+    (function () {
+      var CDN = 'https://cdn.jsdelivr.net/npm/three@0.147.0/';
+      var list = [
+        ['vendor/three.min.js', CDN + 'build/three.min.js'],
+        ['vendor/OrbitControls.js', CDN + 'examples/js/controls/OrbitControls.js'],
+        ['vendor/CSS2DRenderer.js', CDN + 'examples/js/renderers/CSS2DRenderer.js'],
+        ['js/floorplan.js'],
+        ['js/gallery.js'],
+      ];
+      function load(i) {
+        if (i >= list.length) return;
+        var srcs = list[i].slice();
+        (function attempt() {
+          var s = document.createElement('script');
+          s.src = srcs.shift();
+          s.onload = function () { load(i + 1); };
+          s.onerror = function () {
+            if (srcs.length) attempt();
+            else document.getElementById('loadingText').textContent =
+              '3D 라이브러리를 불러오지 못했어요. 인터넷 연결을 확인하거나 setup_assets.py를 실행해 주세요.';
+          };
+          document.body.appendChild(s);
+        })();
+      }
+      load(0);
+    })();
+  </script>
+</body>
+</html>
